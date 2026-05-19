@@ -1,62 +1,126 @@
-# BlueSkyStarterPacks
+# BlueSky Starter Packs
 
-File Descriptions
+This project investigates whether Bluesky Starter Packs promote social diversity or reinforce echo chamber-like communities. Using Bluesky API data, we analyze account overlap, starter pack descriptions, thematic communities, and follower influence across starter packs.
 
-1. Data Cleaning (Data_Cleaning.py): This script collects starter pack data from the Bluesky API.
+This repository supports our research report, **“Echo Chambers in BlueSky Starter Packs.”** The project analyzes Starter Pack URIs, extracts accounts and feeds, clusters starter packs by description and account overlap, and computes popularity metrics based on follower counts.
 
-It first reads the starter pack URIs from starterpacks.jsonl, then queries the Bluesky API to retrieve the starter pack metadata, including the accounts and feeds contained in each pack. The script processes the data one line at a time and writes results incrementally to avoid data loss if the script stops mid-run.
+## Research Questions
 
-Outputs:
-- Trang_account_all.jsonl: Contains (starter pack, account) pairs for all accounts included in each starter pack.
+1. **User Overlap:** Do different starter packs share overlapping accounts that indicate potential community structures?
+2. **Thematic Categorization:** Do starter pack descriptions reveal distinct themes such as journalism, sports, politics, art, or tech?
+3. **Pack Popularity:** Do different communities contain accounts with different levels of follower influence?
 
-- Trang_feeds_all.jsonl: Contains (starter pack, feed) pairs for feeds referenced in each starter pack.
+## Data Source
 
-- Trang_processed.txt: Stores the list of starter pack URIs that have already been processed.
+The project uses a provided dataset of approximately **300,000 Bluesky Starter Pack URIs**. The Starter Pack data was collected using Bluesky API endpoints such as `get_starter_pack`, `get_list`, and `get_profile`.
 
-2. Collecting Account Follower Data (CollectingAccountFollower.py): This script retrieves metadata for each account appearing in the starter packs.
+## Repository Structure
 
-It reads the accounts from Trang_account_all.jsonl, then calls the Bluesky getProfile API using each account's DID. The script collects follower counts and post counts for each account.
+### `Data_Cleaning.py`
 
-Input:
--Trang_account_all.jsonl
+Collects starter pack data from the Bluesky API.
 
-Output:
-- Trang_accounts_info.jsonl
+The script reads starter pack URIs from `starterpacks.jsonl`, queries the Bluesky API, and retrieves starter pack metadata, accounts, and feeds. It processes data line by line and writes results incrementally to reduce data loss if the script stops during collection.
 
-Contains account-level information including:
+**Outputs:**
+
+- `Trang_account_all.jsonl`  
+  Contains `(starter pack, account)` pairs for all accounts included in each starter pack.
+
+- `Trang_feeds_all.jsonl`  
+  Contains `(starter pack, feed)` pairs for feeds referenced in each starter pack.
+
+- `Trang_processed.txt`  
+  Stores starter pack URIs that have already been processed.
+
+---
+
+### `CollectingAccountFollower.py`
+
+Retrieves metadata for each account appearing in the starter packs.
+
+The script reads accounts from `Trang_account_all.jsonl`, calls the Bluesky `getProfile` API using each account DID, and collects account-level metadata such as follower counts and post counts.
+
+**Input:**
+
+- `Trang_account_all.jsonl`
+
+**Output:**
+
+- `Trang_accounts_info.jsonl`
+
+This file contains:
+
 - account DID
+- account handle
 - follower count
 - post count
 
-3. Description Clustering (Description_Clustering.py): This script performs community detection on starter packs based on their descriptions.
+---
 
-We apply clustering methods (including Leiden community detection and HDBSCAN) to identify groups of similar starter packs. After clusters are generated, we manually examine the cluster descriptions and assign semantic labels to each community.
+### `Description_Clustering.py`
 
-Outputs:
-- Community_Detection.jsonl: Contains the community assignment for each starter pack.
+Performs thematic clustering on starter packs based on their descriptions.
 
-- Clusters_labels.jsonl: Contains manually assigned labels for each detected community.
+Starter pack descriptions are converted into embeddings and clustered using community detection methods, including Leiden community detection and HDBSCAN. After clusters are generated, descriptions are manually reviewed and assigned semantic labels.
 
-4. Compute Median (Compute_Median.py): This script performs the main analysis and generates the statistics used in the paper.
+**Outputs:**
 
-It combines community assignments, community labels, and account follower information to compute popularity metrics for each starter pack and community. Median follower counts are used to measure the typical popularity of accounts within each community.
+- `Community_Detection.jsonl`  
+  Contains the community assignment for each starter pack.
 
-Inputs:
-- Clusters_labels.jsonl
-- Community_Detection.jsonl
-- Trang_accounts_info.jsonl
+- `Clusters_labels.jsonl`  
+  Contains manually assigned labels for each detected community.
 
-Outputs:
-- Aggregated statistics used for visualization
+---
+
+### `Compute_Median.py`
+
+Performs the main analysis and generates statistics used in the research report.
+
+This script combines community assignments, community labels, and account follower information to compute popularity metrics for starter packs and communities. Median follower counts are used to measure the typical popularity of accounts within each community.
+
+**Inputs:**
+
+- `Clusters_labels.jsonl`
+- `Community_Detection.jsonl`
+- `Trang_accounts_info.jsonl`
+
+**Outputs:**
+
+- Aggregated statistics for visualization
 - Figures used in the analysis report
 
-5. Jaccard Similarity Analysis (Jaccard_Similarity.py): This script analyzes the overlap of accounts across starter packs.
+---
 
-Using the (starter pack, account) dataset, it computes Jaccard similarity between starter packs to measure how many accounts they share. These similarities are then used to detect community structures and visualize clusters of overlapping starter packs.
+### `Jaccard_Similarity.py`
 
-Input:
-- Trang_account_all.jsonl
+Analyzes account overlap across starter packs.
 
-Outputs:
+Using the `(starter pack, account)` dataset, this script computes Jaccard similarity between starter packs to measure shared accounts. These similarity scores are used to detect community structure and visualize clusters of overlapping starter packs.
+
+**Input:**
+
+- `Trang_account_all.jsonl`
+
+**Outputs:**
+
 - Jaccard similarity scores between starter packs
 - Community clustering visualization based on account overlap
+
+## Main Methods
+
+### Starter Pack Data Collection
+
+We collected starter pack metadata, account lists, and feed references from Bluesky Starter Pack URIs using the Bluesky API.
+
+### Account Metadata Collection
+
+For each account found in a starter pack, we collected profile-level information such as follower count and post count.
+
+### User Overlap Analysis
+
+We measured overlap between starter packs using **Jaccard similarity**:
+
+```text
+Jaccard Similarity = |A ∩ B| / |A ∪ B|
