@@ -124,3 +124,28 @@ We measured overlap between starter packs using **Jaccard similarity**:
 
 ```text
 Jaccard Similarity = |A ∩ B| / |A ∪ B|
+```
+
+### Description Embeddings
+
+We converted starter pack descriptions into semantic embeddings so that descriptions with similar meanings would be represented close together in vector space.
+
+### DBSCAN / HDBSCAN Clustering
+
+We tested density-based clustering methods such as DBSCAN and HDBSCAN to group similar starter pack descriptions, but these methods produced many noise points and unstable clusters.
+
+### KNN Graph Construction
+
+We built a k-nearest neighbor graph using cosine similarity between description embeddings to connect starter packs with semantically similar descriptions.
+
+### Leiden Community Detection
+
+We applied Leiden community detection to the KNN graph to identify groups of starter packs with similar themes and dense semantic connections.
+
+### Manual Community Labeling
+
+We manually reviewed descriptions within each detected community and assigned interpretable labels such as art, animals, technology, politics, and personal recommendations.
+
+### Popularity Analysis
+
+We computed median follower counts for accounts within each starter pack and community to measure typical account influence while reducing the effect of extreme outliers.
